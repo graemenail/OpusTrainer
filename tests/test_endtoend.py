@@ -18,6 +18,7 @@ class TestEndToEnd(unittest.TestCase):
     def setUp(self) -> None:
         self.__clean_states()
 
+
     def tearDown(self) -> None:
         self.__clean_states()
 
@@ -31,9 +32,10 @@ class TestEndToEnd(unittest.TestCase):
         self.assertEqual(process.returncode, returncode, msg=process.stderr)
 
         # Useful to generate the data, hehe
-        if False and path.endswith('.expected.out'):
+        if path.endswith('.expected.out'):
             with open(path, 'w', encoding='utf-8') as fh:
                 fh.write(process.stdout)
+
 
         with open(path, 'r', encoding='utf-8') as fh:
             reference = fh.read()
@@ -92,11 +94,11 @@ class TestEndToEnd(unittest.TestCase):
                 stderr=subprocess.PIPE,
                 encoding="utf-8")
             self.assertEqual(process.returncode, 0)
-            
+
             # Check that the stderr output is the same the output written to the file
             tmpfile.seek(0)
             self.assertEqual(process.stderr, tmpfile.read())
-            
+
             # Check if the log is the same as the reference log. This is more complicated as we have a time field
             with open('contrib/test-data/test_enzh_config_plain_expected.log', 'r', encoding='utf-8') as reflog:
                 # Loglist has one extra `\n` compared to reference list, due to stderr flushing an extra empty line?
@@ -107,3 +109,9 @@ class TestEndToEnd(unittest.TestCase):
                 self.assertEqual(
                     [remove_timestamp(line) for line in loglist],
                     [remove_timestamp(line) for line in reference])
+
+
+    def test_noise(self):
+        self.assertEndToEnd(['-c', 'contrib/test_enzh_noise_modifier_config.yml', '-d', '--sync'],
+                            "contrib/test-data/test_enzh_noise_modifier_config.expected")
+                            # "contrib/test-data/test_enzh_noise_modifier_config.expected.out")

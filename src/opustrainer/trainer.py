@@ -20,6 +20,7 @@ from pathlib import Path
 import yaml
 
 from opustrainer.modifiers import Modifier
+from opustrainer.modifiers.noise import NoiseModifier
 from opustrainer.modifiers.prefix import PrefixModifier
 from opustrainer.modifiers.surface import UpperCaseModifier, TitleCaseModifier
 from opustrainer.modifiers.placeholders import PlaceholderTagModifier
@@ -44,6 +45,7 @@ MODIFIERS = {
     'Typos': TypoModifier,
     'Prefix': PrefixModifier,
     'Retokenize': RetokenizeModifier,
+    'Noise': NoiseModifier,
 }
 
 @dataclass(frozen=True)
@@ -176,7 +178,7 @@ class DatasetReader:
         # Shuffle data to the temporary file.
         # TODO: With the reimplementation of shuffle.py, it is technically
         # feasible to just write to a named pipe (or even stdout) instead of
-        # a temporary file, and let the trainer read directly from that. Not 
+        # a temporary file, and let the trainer read directly from that. Not
         # sure if that has any performance or stability benefits/drawbacks.
         subprocess.check_call([sys.executable,
             '-m', 'opustrainer.shuffle',
@@ -543,7 +545,7 @@ class CurriculumV1Loader:
                 except Exception as exc:
                     raise CurriculumLoaderError(f"could not convert '{name}' to the correct type: {exc!s}") from exc
             args[name] = value
-        
+
         return args
 
     T = TypeVar('T')
@@ -874,7 +876,7 @@ def main() -> None:
                     model_trainer.terminate()
                 else:
                     model_trainer.kill()
-                
+
                 logger.log(f"waiting for trainer to {stage}. Press ctrl-c to be more aggressive")
                 sys.exit(model_trainer.wait()) # blocking
             except KeyboardInterrupt:

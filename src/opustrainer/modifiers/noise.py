@@ -30,7 +30,7 @@ class NoiseModifier(Modifier):
 
     def __call__(self, line: str) -> Optional[str]:
         """Generates a random noise line"""
-        if self.probability < random.random():
+        if self.probability >= random.random():
             random_words: List[str] = get_random_unicode_words(self.min_word_length, self.max_word_length, self.max_words)
             newline: str = " ".join(random_words)
             # Check if we have a 3rd field, which we assume is alignment

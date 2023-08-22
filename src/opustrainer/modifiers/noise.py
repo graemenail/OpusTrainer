@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import List, Optional
 
 from opustrainer.modifiers import Modifier
 from opustrainer.modifiers.placeholders import get_random_unicode_words
@@ -28,7 +28,7 @@ class NoiseModifier(Modifier):
         self.max_word_length = max_word_length
         self.max_words = max_words
 
-    def __call__(self, line: str) -> str | None:
+    def __call__(self, line: str) -> Optional[str]:
         """Generates a random noise line"""
         if self.probability < random.random():
             random_words: List[str] = get_random_unicode_words(self.min_word_length, self.max_word_length, self.max_words)

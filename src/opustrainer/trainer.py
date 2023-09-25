@@ -2,29 +2,41 @@
 """A translation model trainer. It feeds marian different sets of datasets with different thresholds
 for different stages of the training. Data is uncompressed and TSV formatted src\ttrg
 """
-from ctypes import alignment
-import os
-import sys
-import signal
 import argparse
+import os
 import random
+import signal
 import subprocess
+import sys
 import time
-
+from ctypes import alignment
 from dataclasses import dataclass
-from typing import List, Tuple, Dict, Any, Optional, Union, Type, TextIO, cast, Iterable, Iterable, Callable, TypeVar
-from tempfile import TemporaryFile
 from itertools import islice
+from tempfile import TemporaryFile
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    Optional,
+    TextIO,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import yaml
-
+from opustrainer import logger
 from opustrainer.modifiers import Modifier
 from opustrainer.modifiers.noise import NoiseModifier
-from opustrainer.modifiers.prefix import PrefixModifier
-from opustrainer.modifiers.surface import UpperCaseModifier, TitleCaseModifier
 from opustrainer.modifiers.placeholders import PlaceholderTagModifier
+from opustrainer.modifiers.prefix import PrefixModifier
+from opustrainer.modifiers.surface import TitleCaseModifier, UpperCaseModifier
 from opustrainer.modifiers.typos import TypoModifier
-from opustrainer import logger
+
 
 def ignore_sigint():
     """Used as pre-exec hook for the trainer program as to ignore ctrl-c. We'll
@@ -168,7 +180,7 @@ class DatasetReader:
         # Shuffle data to the temporary file.
         # TODO: With the reimplementation of shuffle.py, it is technically
         # feasible to just write to a named pipe (or even stdout) instead of
-        # a temporary file, and let the trainer read directly from that. Not 
+        # a temporary file, and let the trainer read directly from that. Not
         # sure if that has any performance or stability benefits/drawbacks.
         subprocess.check_call([sys.executable, PATH_TO_SHUFFLE,
             *(['--temporary-directory', self.tmpdir] if self.tmpdir else []),
@@ -621,6 +633,7 @@ class Trainer:
 
         return self.stage
 
+    # def run(self, *, batch_size:int=100) -> Iterable[List[str]]:
     def run(self, *, batch_size:int=100) -> Iterable[List[str]]:
         """Yield batches, moving through the stages of training as datasets are consumed."""
         while self.stage is not None:
@@ -785,7 +798,7 @@ def main() -> None:
                     model_trainer.terminate()
                 else:
                     model_trainer.kill()
-                
+
                 logger.log(f"waiting for trainer to {stage}. Press ctrl-c to be more aggressive")
                 sys.exit(model_trainer.wait()) # blocking
             except KeyboardInterrupt:
